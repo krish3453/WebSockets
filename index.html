@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>websockets</h1>
+
+    <div>
+        <input type="text"  id="input">
+        <button id="send">send</button>
+        <ul id="mssg"></ul>
+
+    </div>
+
+    <script>
+        const mssginput=document.getElementById('input')
+        const mssgbtn=document.getElementById('send')
+        const mssgcont=document.getElementById('mssg')
+
+        const {port}=window.location
+        const connection=new WebSocket(`ws://localhost:${port}`)
+        connection.onopen=()=>{
+            connection.onmessage=(message)=>{
+                console.log(message)
+                const rawdata=message.data
+                const parsedata=JSON.parse(rawdata)
+                const text=parsedata.message
+
+                const li=document.createElement('li')
+                li.innerText=text
+                mssgcont.appendChild(li)
+            }
+            mssgbtn.addEventListener('click',(ev)=>{
+                const value=mssginput.value
+                connection.send(JSON.stringify({message:value}))
+            })
+        }
+    </script>
+</body>
+</html>

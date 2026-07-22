@@ -1,18 +1,24 @@
 import http from 'node:http'
-import{websocketServer} from 'ws'
-
+import { WebSocketServer } from "ws";
+import fs from "fs/promises";
+import path from 'path'
 const port=process.env.PORT ??9000
 
-const server=http.createServer((req,res)=>{
+const server=http.createServer(async function(req,res){
+    const filepath=await fs.readFile(path.resolve('./index.html'), 'utf8')
+    res.setHeader('Content-Type','text/html')
+    return res.end(filepath)
 })
 
-const wsServer=new websocketServer({server:server})
+const wsServer=new WebSocketServer({server:server})
 
 wsServer.on('connection',(socket)=>{
     console.log('Client connected')
-    websocketServer.on('message',(data)=>{
-        console.log(`Received message: ${data}`)
-        
+    socket.on('message',(data)=>{
+        console.log(`Received message: ${data}`,data.toString())
+        wsServer.clients.forEach(client=>{
+            client.send(data.toString())
+        })
     })
 
 })
